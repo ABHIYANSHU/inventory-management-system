@@ -1,0 +1,66 @@
+version: '3.8' # Specify the version of Docker Compose
+
+services: # Define the services/containers
+  db: # Database service
+    image: postgres:15-alpine # Use the official PostgreSQL image light version
+    container_name: my_db # Name of the container
+    restart: unless-stopped # Restart policy
+    environment: # Environment variables for PostgreSQL
+      POSTGRES_DB: inventory_db # Database name
+      POSTGRES_USER: postgres # Database user
+      POSTGRES_PASSWORD: postgres # Database password
+    ports:
+      - "5432:5432" # Expose PostgreSQL port
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist data which does not get deleted when app is stopped.
+
+  backend: # Django Backend Service
+    build: ./backend # Path to the Dockerfile for the backend
+    container_name: django_backend # Name of the container
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && echo \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'admin123')\" | python manage.py shell && python manage.py runserver 0.0.0.0:8000" # Commands to run on container start
+    ports:
+      - "8000:8000" # Expose Django port
+    depends_on:
+      - db # Ensure the database starts before the backend
+    volumes:
+      - ./backend:/app # Mount the backend code for live updates
+
+  frontend: # React Frontend Service
+    build: ./frontend # Path to the Dockerfile for the frontend
+    container_name: react_frontend # Name of the container
+    ports:
+      - "3000:3000" # Expose React port
+    depends_on:
+      - backend # Ensure the backend starts before the frontend
+    volumes:
+      - ./frontend:/app # Mount the frontend code for live updates
+      - /app/node_modules # Prevent overwriting node_modules
+
+  redis: # Redis Service for Celery, Celery is a task queue
+    image: redis:7-alpine # Use the official Redis image light version
+    container_name: redis # Name of the container
+    ports:
+      - "6379:6379" # Expose Redis port
+
+  celery_worker: # Celery Worker Service
+    build: ./backend # Path to the Dockerfile for the backend
+    container_name: celery_worker # Name of the container
+    command: celery -A backend worker -l info # Command to start the Celery worker
+    depends_on:
+      - db # Ensure the database starts before the worker
+      - redis # Ensure Redis starts before the worker
+    volumes:
+      - ./backend:/app # Mount the backend code for live updates
+
+  celery_beat: # Celery Beat Service for periodic tasks
+    build: ./backend # Path to the Dockerfile for the backend
+    container_name: celery_beat # Name of the container
+    command: celery -A backend beat -l info # Command to start the Celery beat scheduler
+    depends_on:
+      - db # Ensure the database starts before the beat
+      - redis # Ensure Redis starts before the beat
+    volumes:
+      - ./backend:/app # Mount the backend code for live updates
+
+volumes: # Define named volumes
+  postgres_data: # Volume for PostgreSQL data persistence

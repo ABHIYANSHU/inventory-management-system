@@ -1,0 +1,49 @@
+{
+  "_comment_name": "Project name - identifies the application",
+  "name": "frontend",
+  
+  "_comment_version": "Project version - follows semantic versioning (major.minor.patch)",
+  "version": "1.0.0",
+  
+  "_comment_private": "Prevents accidental publishing to npm registry",
+  "private": true,
+  
+  "_comment_dependencies": "Production dependencies - packages required to run the app",
+  "dependencies": {
+    "_comment_mui": "Material-UI - React component library for UI design",
+    "@mui/material": "^5.14.0",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.0",
+    
+    "_comment_axios": "HTTP client for making API requests to Django backend",
+    "axios": "^1.5.0",
+    
+    "_comment_react": "React library - core framework for building UI",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    
+    "_comment_scripts": "Create React App tooling - handles build configuration",
+    "react-scripts": "5.0.1"
+  },
+  
+  "_comment_scripts": "npm commands to run the application",
+  "scripts": {
+    "_comment_start": "Starts development server at http://localhost:3000",
+    "start": "react-scripts start",
+    
+    "_comment_build": "Creates optimized production build in build/ folder",
+    "build": "react-scripts build"
+  },
+  
+  "_comment_eslintConfig": "ESLint configuration for code quality and style checking",
+  "eslintConfig": {
+    "extends": ["react-app"]
+  },
+  
+  "_comment_browserslist": "Target browsers for CSS/JS compatibility",
+  "browserslist": {
+    "production": [">0.2%", "not dead", "not op_mini all"],
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+  }
+}
